@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>เก็บความรักชั้นสิไออะบ้วน</title>
+    <style>
+      body {
+        font-family: 'Poppins', sans-serif;
+        background-color: #fbe8eb;
+        color: #333;
+        text-align: center;
+        margin: 0;
+        padding: 0;
+      }
+
+      .game-container {
+        max-width: 600px;
+        margin: 20px auto;
+        padding: 20px;
+        background-color: #fff;
+        border-radius: 20px;
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+      }
+
+      h1 {
+        font-family: 'Dancing Script', cursive;
+        color: #ff6f61;
+        margin-bottom: 20px;
+      }
+
+      #gameArea {
+        position: relative;
+        width: 100%;
+        height: 400px;
+        border: 2px solid #ff6f61;
+        background-color: #fff5f7;
+        overflow: hidden;
+        border-radius: 15px;
+        box-shadow: inset 0 0 10px rgba(255, 105, 180, 0.5);
+      }
+
+      .item {
+        position: absolute;
+        font-size: 60px; /* Increased size for better visibility */
+        animation: fall 2s linear;
+      }
+
+      @keyframes fall {
+        0% {
+          top: -10%;
+        }
+        100% {
+          top: 100%;
+        }
+      }
+
+      #startButton {
+        margin-top: 20px;
+        padding: 10px 20px;
+        font-size: 18px;
+        color: #fff;
+        background-color: #ff6f61;
+        border: none;
+        border-radius: 30px;
+        cursor: pointer;
+        box-shadow: 0 4px 8px rgba(255, 105, 180, 0.3);
+        transition: background-color 0.3s;
+      }
+
+      #startButton:hover {
+        background-color: #ff4b6e;
+      }
+
+      #scoreBoard {
+        margin: 20px 0;
+        font-size: 24px;
+        font-weight: bold;
+        color: #ff6f61;
+      }
+
+      #result {
+        margin-top: 20px;
+        font-size: 20px;
+        color: #ff6f61;
+      }
+
+      #qrCode {
+        margin-top: 10px;
+        width: 150px;
+        height: 150px;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(255, 105, 180, 0.5);
+      }
+
+      .hidden {
+        display: none;
+      }
+
+      @keyframes flashKiss {
+        0% {
+          opacity: 0;
+        }
+        50% {
+          opacity: 1;
+        }
+        100% {
+          opacity: 0;
+        }
+      }
+
+      .flash-kiss {
+        position: absolute;
+        font-size: 50px;
+        color: #ff6f61;
+        top: 10%;
+        left: 50%;
+        transform: translateX(-50%);
+        animation: flashKiss 0.5s ease-out;
+      }
+    </style>
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&family=Dancing+Script:wght@400;700&display=swap"
+    />
+  </head>
+  <body>
+    <div class="game-container">
+      <h1>เก็บความรักชั้นสิไออะบ้วน</h1>
+      <div id="scoreBoard">คะแนน: <span id="score">0</span></div>
+      <div id="gameArea"></div>
+      <button id="startButton">เริ่มเกม</button>
+      <div id="result" class="hidden">
+        <h2>ยินดีด้วย!</h2>
+        <p>คุณเก็บได้ทั้งหมดแล้ว!</p>
+        <img id="qrCode" src="" alt="QR Code" />
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/qrious@latest/dist/qrious.min.js"></script>
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+        const gameArea = document.getElementById('gameArea');
+        const startButton = document.getElementById('startButton');
+        const resultDiv = document.getElementById('result');
+        const qrCodeImg = document.getElementById('qrCode');
+        const scoreElement = document.getElementById('score');
+
+        let itemCount = 0;
+        let gameInterval;
+        let score = 0;
+
+        startButton.addEventListener('click', () => {
+          startButton.disabled = true;
+          itemCount = 0;
+          score = 0;
+          scoreElement.textContent = score;
+          resultDiv.classList.add('hidden');
+          gameArea.innerHTML = '';
+
+          gameInterval = setInterval(() => {
+            if (itemCount >= 20) {
+              clearInterval(gameInterval);
+              showResult();
+              return;
+            }
+            createFallingItem();
+          }, 1000);
+
+          setTimeout(() => {
+            clearInterval(gameInterval);
+            if (itemCount < 20) {
+              showResult();
+            }
+          }, 20000);
+        });
+
+        function createFallingItem() {
+          const emojis = ['💖', '😍', '😘', '🌹', '💌'];
+          const emoji = emojis[Math.floor(Math.random() * emojis.length)];
+          const item = document.createElement('div');
+          item.className = 'item';
+          item.style.left = `${Math.random() * 100}%`;
+          item.textContent = emoji;
+
+          gameArea.appendChild(item);
+
+          item.addEventListener('click', () => {
+            itemCount++;
+            score++;
+            scoreElement.textContent = score;
+            gameArea.removeChild(item);
+
+            // Add flash kiss effect
+            const flashKiss = document.createElement('div');
+            flashKiss.className = 'flash-kiss';
+            flashKiss.textContent = '💋';
+            gameArea.appendChild(flashKiss);
+
+            setTimeout(() => {
+              gameArea.removeChild(flashKiss);
+            }, 500);
+          });
+        }
+
+        function showResult() {
+          resultDiv.classList.remove('hidden');
+          const qr = new QRious({
+            element: qrCodeImg,
+            value: 'https://harlequin-austin-93.tiiny.site/',
+            size: 150,
+          });
+        }
+      });
+    </script>
+  </body>
+</html>
